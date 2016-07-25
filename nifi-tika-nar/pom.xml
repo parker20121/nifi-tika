@@ -17,21 +17,25 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.nifi</groupId>
-        <artifactId>nifi-nar-bundles</artifactId>
-        <version>0.7.0</version>
+        <groupId>com.giantoak.nifi</groupId>
+        <artifactId>tika</artifactId>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.giantoak.nifi</groupId>
-    <artifactId>tika</artifactId>
+    <artifactId>nifi-tika-nar</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    
-    <name>nifi-tika-bundle</name>
-    
-    <modules>
-        <module>nifi-tika-processors</module>
-        <module>nifi-tika-nar</module>
-    </modules>
+    <packaging>nar</packaging>
+    <properties>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <source.skip>true</source.skip>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.giantoak.nifi</groupId>
+            <artifactId>nifi-tika-processors</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>
