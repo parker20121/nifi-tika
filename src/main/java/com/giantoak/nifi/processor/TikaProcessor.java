@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.io.FileUtils;
 import org.apache.nifi.annotation.behavior.InputRequirement;
 import org.apache.nifi.annotation.behavior.InputRequirement.Requirement;
@@ -99,6 +101,11 @@ public class TikaProcessor extends AbstractProcessor {
         return this.relationships;
     }
     
+    @Override
+    public List<PropertyDescriptor> getSupportedPropertyDescriptors(){
+        return properties;
+    }
+
     @SuppressWarnings("unused")
     @OnScheduled
     public void onScheduled(ProcessContext context) {
@@ -116,7 +123,8 @@ public class TikaProcessor extends AbstractProcessor {
         }
 
         final ComponentLog logger = this.getLogger();
-
+        final AtomicReference<Map<String, String>> value = new AtomicReference<>(null);
+        
         String inputFileAttribute = context.getProperty(INPUT_FILE_ATTRIBUTE).getValue();
         String inputFileName = flowFile.getAttribute(inputFileAttribute);
         String outputFileName = inputFileName + ".xhtml";
@@ -140,14 +148,22 @@ public class TikaProcessor extends AbstractProcessor {
             String content = handler.toString();
             FileUtils.writeStringToFile( outputFile, content );           
         } catch ( Exception e ){
+            session.transfer(flowFile, FAILURE );
             throw new ProcessException(e);
+        }        
+        
+            // Write the results to attributes
+        Set<String> keys = value.get().keySet();
+        for ( String key: keys ){
+            session.putAttribute(flowFile, key, value.get().get(key) );
         }
-    
-        // Write the results to attributes
-        Map<String, String> results = value.get();
-        if (results != null && !results.isEmpty()) {
-            flowFile = session.putAllAttributes(flowFile, results);
-        }
+        
+            
+        //Map<String, String> results = value.get();
+        //if (results != null && !results.isEmpty()) {
+        //    flowFile = session.putAllAttributes(flowFile, results);
+        //}
+        
         session.transfer(flowFile, SUCCESS);
         
     }
